@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fizika Jegyzetek - PDF Előnézet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .pdf-controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .pdf-viewer {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        #pdfContainer {
+            width: 100%;
+            height: 80vh;
+            min-height: 600px;
+            border: none;
+            display: block;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .sample-urls {
+            background: #edf2f7;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
+        .sample-urls h3 {
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+
+        .sample-url {
+            display: block;
+            color: #667eea;
+            text-decoration: none;
+            padding: 0.25rem 0;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        .sample-url:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem 0;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .disclaimer {
+            font-size: 0.9rem;
+            font-style: italic;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            #pdfContainer {
+                height: 70vh;
+                min-height: 400px;
+            }
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🧲 Fizika Jegyzetek</h1>
+                <p class="subtitle">PDF Előnézet és Megtekintés</p>
+                <p style="font-size: 0.95rem; opacity: 0.8;">Egyszerű PDF megtekintő a fizika jegyzeteidhez</p>
+            </div>
+        </header>
+
+        <div class="disclaimer">
+            <strong>Jogi nyilatkozat:</strong> A szerző nem vállal felelősséget a jegyzetekben található esetleges hibákért, hiányosságokért, vagy azok pontatlanságáért. A jegyzet használata a felhasználó saját felelősségére történik.
+        </div>
+
+        <div class="pdf-controls">
+            <div class="control-group">
+                <label for="pdfUrl">PDF URL megadása:</label>
+                <input type="url" id="pdfUrl" placeholder="https://example.com/your-pdf-file.pdf" />
+            </div>
+            
+            <div class="btn-group">
+                <button onclick="loadPDF()">PDF Betöltése</button>
+                <button onclick="loadPDFDirect()">Közvetlen betöltés</button>
+                <button onclick="openInNewTab()">Új ablakban megnyitás</button>
+                <button onclick="clearViewer()">Törlés</button>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <div class="sample-urls">
+                <h3>Példa PDF-ek teszteléshez:</h3>
+                <a href="#" class="sample-url" onclick="loadSamplePDF('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')">
+                    W3.org Teszt PDF
+                </a>
+                <a href="#" class="sample-url" onclick="loadSamplePDF('https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf')">
+                    Adobe Minta PDF
+                </a>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 0.5rem;">
+                    Megjegyzés: A saját PDF fájljaidat GitHub-on tárolhatod és a raw URL-jét használhatod.
+                </p>
+            </div>
+        </div>
+
+        <div class="pdf-viewer">
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                PDF betöltése...
+            </div>
+            <iframe id="pdfContainer" style="display: none;"></iframe>
+            <div id="welcomeMessage" style="padding: 3rem; text-align: center; color: #666;">
+                <h3>Üdvözöllek a Fizika Jegyzetek PDF Megtekintőjében! 👋</h3>
+                <p>Add meg a PDF URL-jét a fenti mezőben és kattints a "PDF Betöltése" gombra.</p>
+                <br>
+                <p style="font-size: 0.9rem;">
+                    <strong>Tipp:</strong> GitHub-on tárolt PDF fájlokhoz használd a "raw" URL-t:
+                    <br>
+                    <code style="background: #f1f1f1; padding: 0.2rem 0.5rem; border-radius: 3px;">
+                        https://raw.githubusercontent.com/felhasználó/repo/branch/fájl.pdf
+                    </code>
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <p>📚 Fizika Jegyzetek - PDF Megtekintő</p>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem;">
+                Készítve szeretettel a fizika tanulásához ❤️
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loadingIndicator');
+            const iframe = document.getElementById('pdfContainer');
+            const welcome = document.getElementById('welcomeMessage');
+            
+            if (show) {
+                loading.style.display = 'flex';
+                iframe.style.display = 'none';
+                welcome.style.display = 'none';
+            } else {
+                loading.style.display = 'none';
+            }
+        }
+
+        function isValidURL(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function isPDFUrl(url) {
+            const lowerUrl = url.toLowerCase();
+            return lowerUrl.includes('.pdf') || lowerUrl.includes('pdf') || lowerUrl.includes('application/pdf');
+        }
+
+        function loadPDF() {
+            const urlInput = document.getElementById('pdfUrl');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Kérlek add meg a PDF URL-jét!');
+                return;
+            }
+            
+            if (!isValidURL(url)) {
+                showError('Érvénytelen URL formátum! Kérlek adj meg egy érvényes HTTP/HTTPS URL-t.');
+                return;
+            }
+            
+            showLoading(true);
+            
+            const iframe = document.getElementById('pdfContainer');
+            const welcome = document.getElementById('welcomeMessage');
+            
+            // Try direct PDF loading first, fallback to Google viewer if needed
+            let viewerUrl = url;
+            
+            // Check if we should use Google Docs viewer for better compatibility
+            if (url.includes('github.com') || url.includes('raw.githubusercontent.com')) {
+                // For GitHub files, try direct first
+                viewerUrl = url;
+            } else {
+                // For other sources, use Google viewer for better compatibility
+                viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+            }
+            
+            iframe.onload = function() {
+                showLoading(false);
+                iframe.style.display = 'block';
+                welcome.style.display = 'none';
+                showSuccess('PDF sikeresen betöltve!');
+            };
+            
+            iframe.onerror = function() {
+                showLoading(false);
+                // Try Google viewer as fallback if direct loading fails
+                if (iframe.src === url) {
+                    const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+                    iframe.src = googleViewerUrl;
+                    showSuccess('PDF betöltése Google Viewer-rel...');
+                } else {
+                    showError('Hiba történt a PDF betöltése során. Ellenőrizd az URL-t és próbáld újra!');
+                    welcome.style.display = 'block';
+                }
+            };
+            
+            iframe.src = viewerUrl;
+            
+            // Store the URL in localStorage for persistence
+            localStorage.setItem('lastPdfUrl', url);
+        }
+
+        function loadPDFDirect() {
+            const urlInput = document.getElementById('pdfUrl');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Kérlek add meg a PDF URL-jét!');
+                return;
+            }
+            
+            if (!isValidURL(url)) {
+                showError('Érvénytelen URL formátum! Kérlek adj meg egy érvényes HTTP/HTTPS URL-t.');
+                return;
+            }
+            
+            showLoading(true);
+            
+            const iframe = document.getElementById('pdfContainer');
+            const welcome = document.getElementById('welcomeMessage');
+            
+            iframe.onload = function() {
+                showLoading(false);
+                iframe.style.display = 'block';
+                welcome.style.display = 'none';
+                showSuccess('PDF sikeresen betöltve közvetlenül!');
+            };
+            
+            iframe.onerror = function() {
+                showLoading(false);
+                showError('Közvetlen betöltés sikertelen. Próbáld a "PDF Betöltése" gombot!');
+                welcome.style.display = 'block';
+            };
+            
+            iframe.src = url;
+            
+            // Store the URL in localStorage for persistence
+            localStorage.setItem('lastPdfUrl', url);
+        }
+
+        function loadSamplePDF(url) {
+            document.getElementById('pdfUrl').value = url;
+            loadPDF();
+        }
+
+        function openInNewTab() {
+            const url = document.getElementById('pdfUrl').value.trim();
+            
+            if (!url) {
+                showError('Először adj meg egy PDF URL-t!');
+                return;
+            }
+            
+            if (!isValidURL(url)) {
+                showError('Érvénytelen URL formátum!');
+                return;
+            }
+            
+            window.open(url, '_blank');
+        }
+
+        function clearViewer() {
+            const iframe = document.getElementById('pdfContainer');
+            const welcome = document.getElementById('welcomeMessage');
+            const urlInput = document.getElementById('pdfUrl');
+            
+            iframe.src = '';
+            iframe.style.display = 'none';
+            welcome.style.display = 'block';
+            urlInput.value = '';
+            
+            showSuccess('Megtekintő törölve!');
+            localStorage.removeItem('lastPdfUrl');
+        }
+
+        // Load last PDF URL on page load
+        window.addEventListener('load', function() {
+            const lastUrl = localStorage.getItem('lastPdfUrl');
+            if (lastUrl) {
+                document.getElementById('pdfUrl').value = lastUrl;
+            }
+        });
+
+        // Allow Enter key to load PDF
+        document.getElementById('pdfUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadPDF();
+            }
+        });
+
+        // Add some keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        loadPDF();
+                        break;
+                    case 'Backspace':
+                        e.preventDefault();
+                        clearViewer();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
